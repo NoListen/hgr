@@ -10,7 +10,7 @@ DEFAULT_ENV_PARAMS = {
         'n_cycles': 10,
         'n_batches': 50,
         'rollout_batch_size': 2,
-        'batch_size': 5120,
+        'batch_size': 256,
         'n_test_rollouts': 5,
         'random_eps': 0.3,
         'noise_eps': 0.2,
@@ -47,7 +47,7 @@ DEFAULT_ENV_PARAMS = {
         'train_pi_interval': 1,
 
         'polyak': 0.95,
-        'batch_size': 5120,
+        'batch_size': 256,
 
         'use_per': True,
         'prioritized_replay_alpha': 0.6,
@@ -73,7 +73,7 @@ DEFAULT_ENV_PARAMS = {
         'train_pi_interval': 1,
 
         'polyak': 0.95,
-        'batch_size': 5120,
+        'batch_size': 256,
 
         'use_per': True,
         'prioritized_replay_alpha': 0.8,
@@ -99,7 +99,7 @@ DEFAULT_ENV_PARAMS = {
         'train_pi_interval': 1,
 
         'polyak': 0.95,
-        'batch_size': 5120,
+        'batch_size': 256,
 
         'use_per': True,
         'prioritized_replay_alpha': 0.6,

@@ -125,6 +125,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         while it_capacity < size_in_episodes:
             it_capacity *= 2
         size_in_transitions = it_capacity * time_horizon
+        # rescale the shape
         super(PrioritizedReplayBuffer, self).__init__(buffer_shapes, size_in_transitions, time_horizon)
 
         if replay_strategy == 'future':
@@ -141,9 +142,12 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         self._it_min = MinSegmentTree(it_capacity)
 
         if self.replay_strategy == 'future':
+            # all the possible combinations.
             self._length_weight = int((self.time_horizon + 1) * self.time_horizon / 2)
             self.weight_of_transition = np.empty([self.size_in_episodes, self._length_weight])
+            # td_of_transitions for each episode has length length_weight. Weights should be associated withh them.
             self.td_of_transition = np.empty([self.size_in_episodes, self._length_weight])
+            # this is like a look up table.
             self._idx_state_and_future = np.empty(self._length_weight, dtype=list)
             # self._idx_state_and_future = np.empty([self._length_weight, 2], dtype=np.int32)  # Lookup table
             _idx = 0
@@ -167,6 +171,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
     def store_episode(self, episode_batch):
         """episode_batch: array(batch_size x (time_horizon or time_horizon+1) x dim_key)
         """
+        # store the data samples with default priorities
         super().store_episode(episode_batch)
 
         idx_ep = self._next_idx
@@ -205,6 +210,8 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             for key in self.buffers.keys():
                 buffers[key] = self.buffers[key][:self.current_size]
 
+        # still analyze from the trajectory level.
+        # TODO (lisheng) What's the density module?
         buffers['o_2'] = buffers['o'][:, 1:, :]
         buffers['ag_2'] = buffers['ag'][:, 1:, :]
 
@@ -266,6 +273,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         weight_of_transitions = np.zeros(batch_size, dtype=np.float)
         for i in range(batch_size):
             if self.global_norm:
+                # How are the weights calculated from the tderrors.
                 _max_weight_transition = \
                     (self.weight_of_transition[episode_idxs[i]].min() * self._length_weight) ** (-beta_prime)
             weight_prob = \
@@ -276,6 +284,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             transition_idxs[i] = _idx
             t_states[i] = self._idx_state_and_future[_idx][0]   # Get index from lookup table
             t_futures[i] = self._idx_state_and_future[_idx][1]  # Get index from lookup table
+            # the weight is used to correct the bias in HGR.
             if self.global_norm:
                 weight_of_transitions[i] = \
                     (self.weight_of_transition[episode_idxs[i], _idx] * self._length_weight) ** (-beta_prime) \
@@ -295,6 +304,7 @@ class PrioritizedReplayBuffer(ReplayBuffer):
         # HER transitions (as defined by her_indexes). For the other transitions,
         # keep the original goal.
         future_ag = episode_batch['ag'][episode_idxs[her_indexes], t_futures[her_indexes]]
+        # I guess the rest keep the original goal.
         transitions['g'][her_indexes] = future_ag
 
         # Reconstruct info dictionary for reward computation.
@@ -345,10 +355,13 @@ class PrioritizedReplayBuffer(ReplayBuffer):
             assert _priority_of_transition > 0
             assert 0 <= ep_idx < self.get_current_episode_size()
             # Update weight for transitions in 1 episode
+            # the index among those combinations
+
             self.weight_of_transition[ep_idx, transition_idx] = _priority_of_transition ** self._alpha_prime
             self.td_of_transition[ep_idx, transition_idx] = _priority_of_transition
 
-            # Update weight for all episodes
+            # Update weight for the current episodes. ( update it )
+            # hierarchical priority - at first the sum of the td errors - then the pairs of highest tderrors.
             _priority_of_episode = self.td_of_transition[ep_idx].mean()
             self._it_sum[ep_idx] = _priority_of_episode ** self._alpha
             self._it_min[ep_idx] = _priority_of_episode ** self._alpha

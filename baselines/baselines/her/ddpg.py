@@ -162,10 +162,12 @@ class DDPG(object):
         if self.prioritized_replay_beta_iters is None:
             self.prioritized_replay_beta_iters = self.total_timesteps
 
+        # will be used in sampling.
         self.beta_schedule = LinearSchedule(schedule_timesteps=self.prioritized_replay_beta_iters,
                                             initial_p=self.prioritized_replay_beta0,
                                             final_p=1.0)
 
+        # If use_per, sample transitions is a dictionary. otherwise, it's a function.
         if self.use_per:
             self.buffer = PrioritizedReplayBuffer(buffer_shapes, self.buffer_size, self.time_horizon,
                                                   alpha=self.prioritized_replay_alpha,

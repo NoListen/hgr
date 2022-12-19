@@ -371,6 +371,7 @@ def configure_her(params):
         params['_' + name] = her_params[name]
         del params[name]
 
+    # per is the abbreviation
     if params['_use_per']:
         sample_her_transitions = her_params
     else:

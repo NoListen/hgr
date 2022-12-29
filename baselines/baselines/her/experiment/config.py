@@ -9,8 +9,8 @@ DEFAULT_ENV_PARAMS = {
     'FetchReach-v1': {
         'n_cycles': 10,
         'n_batches': 50,
-        'rollout_batch_size': 2,
-        'batch_size': 256,
+        'rollout_batch_size': 40,
+        'batch_size': 5120,
         'n_test_rollouts': 5,
         'random_eps': 0.3,
         'noise_eps': 0.2,
@@ -47,7 +47,7 @@ DEFAULT_ENV_PARAMS = {
         'train_pi_interval': 1,
 
         'polyak': 0.95,
-        'batch_size': 256,
+        'batch_size': 5120,
 
         'use_per': True,
         'prioritized_replay_alpha': 0.6,
@@ -73,7 +73,7 @@ DEFAULT_ENV_PARAMS = {
         'train_pi_interval': 1,
 
         'polyak': 0.95,
-        'batch_size': 256,
+        'batch_size': 5120,
 
         'use_per': True,
         'prioritized_replay_alpha': 0.8,
@@ -99,7 +99,7 @@ DEFAULT_ENV_PARAMS = {
         'train_pi_interval': 1,
 
         'polyak': 0.95,
-        'batch_size': 256,
+        'batch_size': 5120,
 
         'use_per': True,
         'prioritized_replay_alpha': 0.6,
@@ -139,7 +139,7 @@ DEFAULT_ENV_PARAMS = {
 
         'buffer_size': int(1E6),
         'global_norm': True,
-        'rollout_batch_size': 10,
+        'rollout_batch_size': 40,
     },
     'HandManipulateBlockFull-v0': {
         'n_cycles': 50,
@@ -243,7 +243,7 @@ DEFAULT_PARAMS = {
     'relative_goals': False,
     # training
     'n_cycles': 50,  # per epoch
-    'rollout_batch_size': 2,  # per mpi thread (number of collected episodes each time execution)
+    'rollout_batch_size': 40,  # per mpi thread (number of collected episodes each time execution)
     'n_batches': 40,  # training batches per cycle
     'batch_size': 256,  # per mpi thread, measured in transitions and reduced to even multiple of chunk_length.
     'n_test_rollouts': 10,  # number of test rollouts per epoch, each consists of rollout_batch_size rollouts
